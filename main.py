@@ -1,5 +1,5 @@
 import datasets
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
 
 
 
@@ -65,15 +65,20 @@ tokenized_data_train = tokenized_data_train["train"]
 tokenized_data_test = tokenized_data_test["train"]
 tokenized_data_validation = tokenized_data_validation["train"]
 
+
+## Train with PyTorch Trainer
+print("...TRAIN...")
+
 model = AutoModelForSequenceClassification.from_pretrained("prithivida/parrot_paraphraser_on_T5", num_labels=7)
 
-'''
-from transformers import TrainingArguments
+print("...training hyperparameters...")
 
-#training_args = TrainingArguments(output_dir="test_trainer")
+training_args = TrainingArguments(output_dir="test_trainer", evaluation_strategy="epoch")
 
 import numpy as np
 import evaluate
+
+print("...evaluate...")
 
 metric = evaluate.load("accuracy")
 
@@ -82,17 +87,17 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(logits, axis=-1)
     return metric.compute(predictions=predictions, references=labels)
 
-from transformers import TrainingArguments, Trainer
 
-training_args = TrainingArguments(output_dir="test_trainer", evaluation_strategy="epoch")
-
+print("...trainer...")
 
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=data_train,
-    eval_dataset=data_test_en,
+    train_dataset=tokenized_data_train,
+    eval_dataset=tokenized_data_test,
     compute_metrics=compute_metrics,
-    label_column_name="annot_score"
 )
-'''
+
+print("!!! train !!!")
+
+trainer.train()
