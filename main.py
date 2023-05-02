@@ -1,5 +1,7 @@
 import datasets
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
+import numpy as np
+import evaluate
 
 
 
@@ -74,9 +76,6 @@ model = AutoModelForSequenceClassification.from_pretrained("prithivida/parrot_pa
 print("...training hyperparameters...")
 
 training_args = TrainingArguments(output_dir="test_trainer", evaluation_strategy="epoch")
-
-import numpy as np
-import evaluate
 
 print("...evaluate...")
 
