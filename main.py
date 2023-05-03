@@ -45,9 +45,9 @@ tokenized_data_validation = data_validation_en.map(tokenize_function, batched=Tr
 def clean(dataset):
 
     dataset = dataset.remove_columns(["orig_id", "lang", "gem_id", "sent1", "sent2"])
-    if dataset.has_column("annot_score"):
+    if "annot_score" in dataset["train"].features:
         dataset = dataset.rename_column("annot_score", "labels")
-    elif dataset.has_column("quality"):
+    if "quality" in dataset["train"].features:
         dataset = dataset.rename_column("quality", "labels")
 
     dataset = dataset.with_format("torch")
