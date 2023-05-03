@@ -1,5 +1,6 @@
 import datasets
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, \
+    AutoModelForSeq2SeqLM, DataCollatorWithPadding
 import numpy as np
 import evaluate
 
@@ -39,6 +40,8 @@ tokenized_data_train = data_train_en.map(tokenize_function, batched=True)
 tokenized_data_test = data_test_en.map(tokenize_function, batched=True)
 tokenized_data_validation = data_validation_en.map(tokenize_function, batched=True)
 
+data_collator = DataCollatorWithPadding(tokenizer)
+
 # clean
 
 
@@ -50,7 +53,7 @@ def clean(dataset):
     if "quality" in dataset["train"].features:
         dataset = dataset.rename_column("quality", "labels")
 
-    dataset = dataset.with_format("torch")
+    #dataset = dataset.with_format("torch")
 
     return dataset
 
@@ -67,11 +70,13 @@ tokenized_data_train = tokenized_data_train["train"]
 tokenized_data_test = tokenized_data_test["train"]
 tokenized_data_validation = tokenized_data_validation["train"]
 
+print(tokenized_data_test)
+
 
 ## Train with PyTorch Trainer
 print("...TRAIN...")
 
-model = AutoModelForSequenceClassification.from_pretrained("prithivida/parrot_paraphraser_on_T5", num_labels=7)
+model = AutoModelForSeq2SeqLM.from_pretrained("prithivida/parrot_paraphraser_on_T5", num_labels=7)
 
 print("...training hyperparameters...")
 
@@ -95,6 +100,8 @@ trainer = Trainer(
     train_dataset=tokenized_data_train,
     eval_dataset=tokenized_data_test,
     compute_metrics=compute_metrics,
+    data_collator=data_collator,
+    tokenizer=tokenizer,
 )
 
 print("!!! train !!!")
